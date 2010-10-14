@@ -88,6 +88,7 @@ describe UsersController do
       response.should have_selector(
         "input[name='user[password_confirmation]'][type='password']")
     end
+
   end
 
   describe "GET 'show'" do
@@ -298,6 +299,14 @@ describe UsersController do
       end
     end
 
+    describe "non-admin shouldn't see delet link" do
+      it "should not see the delete link" do
+        test_sign_in(@user)
+        get :index
+        response.should_not have_selector("a", :content => "delete")
+      end
+    end
+
     describe "as a non-admin user" do
       it "should protect the page" do
         test_sign_in(@user)
@@ -323,6 +332,23 @@ describe UsersController do
         delete :destroy, :id => @user
         response.should redirect_to(users_path)
       end
+    end
+  end
+
+  describe "signed in should hit rootpath for new/create attepted" do
+    before(:each) do
+      @user = Factory(:user)
+      test_sign_in(@user)
+    end
+      
+    it "should be redirected from new to root path" do
+      get :new
+      response.should redirect_to(root_path)
+    end
+
+    it "should be redirect from create to root path" do
+      get :create
+      response.should redirect_to(root_path)
     end
   end
 end
